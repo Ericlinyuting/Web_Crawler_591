@@ -1,5 +1,5 @@
 # Load the datasets
-%run setting_environment.ipynb
+%run setting_environment.py
 
 # input 建案網址 return 建案建案詳情欄位
 # 產出為建案名與12個建案資訊
