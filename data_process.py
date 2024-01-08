@@ -117,7 +117,9 @@ raw_data["阻尼器"] = raw_data.apply(extract_FVD_brands, axis=1)
 raw_data["制震宅"] = np.where(raw_data["制震壁"].notna()|raw_data["斜撐"].notna()|raw_data["阻尼器"].notna(), True, raw_data["制震宅"])
 # endregion
 
+selling_data = raw_data[raw_data["建案標籤"].notna() & raw_data["建案標籤"].str.contains("在售")]
 columns = ['建案名稱','單價', '單位','營造公司', '網址', '縣市','制震宅', '制震壁', '斜撐', '阻尼器']
-data = raw_data[columns]
+data = selling_data[columns]
+data.to_excel("ALL_data.xlsx")
 AST_data = data[data["制震宅"]]
 AST_data.to_excel("AST_data.xlsx")
