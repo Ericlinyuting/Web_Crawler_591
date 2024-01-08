@@ -6,6 +6,7 @@ Created on Fri Jan  5 15:18:11 2024
 """
 
 import pandas as pd
+import numpy as np
 import re
 
 def process_price_range(row):
@@ -41,7 +42,7 @@ def extract_county(row):
 def extract_SDW_brands(row):
     try:
         # 使用正規表達式搜尋指定的廠牌關鍵字前的文字
-        matches = re.findall(r"(住友|EDS|KVM|NS|JFE|EPS)", row["建材說明"])
+        matches = re.findall(r"(住友|EDS|KVM|JFE|EPS|新日鐵)", row["建材說明"])
         
         # 如果找到匹配，返回匹配的文字
         if matches:
@@ -77,6 +78,19 @@ def extract_FVD_brands(row):
     except (TypeError, AttributeError):
         # 如果發生錯誤，返回None
         return None
+def AST(row):
+    try:
+        # 使用正規表達式搜尋指定的廠牌關鍵字前的文字
+        matches = re.search(r"(制震宅)", row["建案標籤"])
+        
+        # 如果找到匹配，返回匹配的文字
+        if matches:
+            return True
+        else:
+            return False
+    except (TypeError, AttributeError):
+        # 如果發生錯誤，返回None
+        return None
 
 path = r"E:\CodeProject\591WebCrawler"
 raw_data = pd.read_excel(path+"\\"+"newhouse591_data.xlsx")
@@ -92,13 +106,20 @@ raw_data["縣市"] = raw_data.apply(extract_county, axis=1)
 # endregion
 
 # region 處理制震器
-AST_data = raw_data[raw_data["建案標籤"].str.contains("制震宅")]
-AST_data["建材說明"].str.replace("泰勒", "Taylor")
+# AST_data = raw_data[raw_data["建案標籤"].str.contains("制震宅")]
+raw_data["制震宅"] = raw_data.apply(AST,axis=1)
+raw_data["建材說明"].str.replace("泰勒", "Taylor")
+raw_data["建材說明"].str.replace("NS高韌性鋼板制震壁", "新日鐵制震壁")
 # 創建新的欄位，並應用自定義函數
-AST_data["制震壁"] = AST_data.apply(extract_SDW_brands, axis=1)
-AST_data["斜撐"] = AST_data.apply(extract_SDB_brands, axis=1)
-AST_data["阻尼器"] = AST_data.apply(extract_FVD_brands, axis=1)
-# region
+raw_data["制震壁"] = raw_data.apply(extract_SDW_brands, axis=1)
+raw_data["斜撐"] = raw_data.apply(extract_SDB_brands, axis=1)
+raw_data["阻尼器"] = raw_data.apply(extract_FVD_brands, axis=1)
+raw_data["制震宅"] = np.where(raw_data["制震壁"].notna()|raw_data["斜撐"].notna()|raw_data["阻尼器"].notna(), True, raw_data["制震宅"])
+# endregion
 
-#還要處理NS 新日鐵廠牌重複計算問題
-# FVD_data = AST_data[AST_data["建材說明"].notna() & AST_data["建材說明"].str.contains("制震器")]
+selling_data = raw_data[raw_data["建案標籤"].notna() & raw_data["建案標籤"].str.contains("在售")]
+columns = ['建案名稱','單價', '單位','營造公司', '網址', '縣市','制震宅', '制震壁', '斜撐', '阻尼器']
+data = selling_data[columns]
+data.to_excel("ALL_data.xlsx")
+AST_data = data[data["制震宅"]]
+AST_data.to_excel("AST_data.xlsx")
