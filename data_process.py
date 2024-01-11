@@ -43,10 +43,12 @@ def extract_SDW_brands(row):
     try:
         # 使用正規表達式搜尋指定的廠牌關鍵字前的文字
         matches = re.findall(r"(住友|EDS|KVM|JFE|EPS|新日鐵)", row["建材說明"])
-        
+        no_brand = re.findall(r"(位移型高韌性鋼板阻尼器)", row["建材說明"])
         # 如果找到匹配，返回匹配的文字
         if matches:
             return ", ".join(matches)
+        elif no_brand:
+            return "No Brand"
         else:
             return None
     except (TypeError, AttributeError):
@@ -68,11 +70,13 @@ def extract_SDB_brands(row):
 def extract_FVD_brands(row):
     try:
         # 使用正規表達式搜尋指定的廠牌關鍵字前的文字
-        matches = re.findall(r"(Taylor|KYB)", row["建材說明"])
-        
+        matches = re.findall(r"(Taylor|KYB|SENQCIA|瑪格巴)", row["建材說明"])
+        no_brand = re.findall(r"(制震阻尼器|黏彈性阻尼器)", row["建材說明"])
         # 如果找到匹配，返回匹配的文字
         if matches:
             return ", ".join(matches)
+        elif no_brand:
+            return "No Brand"
         else:
             return None
     except (TypeError, AttributeError):
@@ -82,9 +86,9 @@ def AST(row):
     try:
         # 使用正規表達式搜尋指定的廠牌關鍵字前的文字
         matches = re.search(r"(制震宅)", row["建案標籤"])
-        
+        damper = re.search(r"(阻尼器)",row["建材說明"])
         # 如果找到匹配，返回匹配的文字
-        if matches:
+        if matches or damper:
             return True
         else:
             return False
@@ -121,5 +125,5 @@ selling_data = raw_data[raw_data["建案標籤"].notna() & raw_data["建案標�
 columns = ['建案名稱','單價', '單位','營造公司', '網址', '縣市','制震宅', '制震壁', '斜撐', '阻尼器']
 data = selling_data[columns]
 data.to_excel("ALL_data.xlsx")
-AST_data = data[data["制震宅"]]
+AST_data = data[data["制震宅"].notna() & data["制震宅"]]
 AST_data.to_excel("AST_data.xlsx")
