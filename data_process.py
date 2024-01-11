@@ -57,11 +57,13 @@ def extract_SDW_brands(row):
 def extract_SDB_brands(row):
     try:
         # 使用正規表達式搜尋指定的廠牌關鍵字前的文字
-        matches = re.findall(r"(UBB)", row["建材說明"])
-        
+        matches = re.findall(r"(UBB|JEF)", row["建材說明"])
+        no_brand = re.findall(r"(斜撐)", row["建材說明"])
         # 如果找到匹配，返回匹配的文字
         if matches:
             return ", ".join(matches)
+        elif no_brand:
+            return "No Brand"
         else:
             return None
     except (TypeError, AttributeError):
@@ -127,3 +129,4 @@ data = selling_data[columns]
 data.to_excel("ALL_data.xlsx")
 AST_data = data[data["制震宅"].notna() & data["制震宅"]]
 AST_data.to_excel("AST_data.xlsx")
+
