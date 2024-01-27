@@ -1,5 +1,13 @@
 # Newhouse-591-Web-Crawler 20231229
 
+# dependency package
+pip freeze > requirements.txt
+pip install -r requirements.txt
+
+# Conda Environment
+conda env export > environment.yml
+conda env create -f environment.yml
+
 程式碼架構大致參考此篇
 https://lucachuang.medium.com/591%E5%94%AE%E5%B1%8B%E7%B6%B2-python%E7%88%AC%E8%9F%B2-35f2b0cda067
 
